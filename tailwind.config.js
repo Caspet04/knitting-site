@@ -1,8 +1,21 @@
+import colors from './src/lib/colors.json';
+
 /** @type {import('tailwindcss').Config} */
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
-		extend: {}
+		extend: {
+			colors: {
+				stitch: {
+					0: colors.stitches.filled['0']
+				}
+			}
+		}
 	},
-	plugins: []
+	plugins: [],
+	safelist: [
+		{
+			pattern: /(bg|fg)-stitch-(0)/
+		}
+	]
 };
