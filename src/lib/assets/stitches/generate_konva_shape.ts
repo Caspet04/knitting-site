@@ -1,5 +1,5 @@
 import { Stitch, stitch_data_list } from '.';
-import colors from '../../colors.json';
+import colors from '../colors.json';
 import Konva from 'konva';
 
 const shapes = new Array<Konva.Shape>(stitch_data_list.length);

@@ -1,4 +1,4 @@
-import colors from './src/lib/colors.json';
+import colors from './src/lib/assets/colors.json';
 
 /** @type {import('tailwindcss').Config} */
 export default {
