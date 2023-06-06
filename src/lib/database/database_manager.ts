@@ -69,7 +69,10 @@ export class SqliteDatabaseManager implements DatabaseManager {
 
 				const stitches: Buffer = Buffer.from(chart.stitches);
 				const update_result = await wrap_database_call(
-					this.database.chart.update({ where: { id }, data: { stitches } })
+					this.database.chart.update({
+						where: { id },
+						data: { stitches, name: chart.name }
+					})
 				).resolve();
 
 				if (update_result.err) {

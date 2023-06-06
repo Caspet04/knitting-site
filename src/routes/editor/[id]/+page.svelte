@@ -12,6 +12,8 @@
 	export let data: PageServerData;
 	let konva_container: HTMLDivElement;
 	const chart_renderer = new ChartRenderer();
+	let chart_name: string = data.chart?.name ?? 'Unknown Name';
+	let chart_name_input: HTMLInputElement;
 
 	$: {
 		(() => {
@@ -48,6 +50,17 @@
 			goto(response_data.redirect);
 		}
 	}
+
+	function update_chart_name() {
+		if (chart_renderer.chart == undefined) {
+			chart_name = 'Unknown Name';
+			return;
+		}
+
+		console.log('Updating chart name');
+
+		chart_renderer.set_chart({ ...chart_renderer.chart, name: chart_name });
+	}
 </script>
 
 {#if data.chart == null}
@@ -68,7 +81,20 @@
 		class="px-2 w-full grid grid-cols-[1fr_auto_1fr] bg-slate-950 text-slate-50 text-lg"
 	>
 		<div>Website Name</div>
-		<div class="text-center">{data.chart?.name}</div>
+		<div>
+			<input
+				class="bg-transparent text-center"
+				type="text"
+				bind:value={chart_name}
+				bind:this={chart_name_input}
+				on:change={() => update_chart_name()}
+				on:keydown={(event) => {
+					if (event.key === 'Enter') {
+						chart_name_input.blur();
+					}
+				}}
+			/>
+		</div>
 	</div>
 	<div class="flex-1 w-full h-full flex">
 		<div class="w-1/6 bg-slate-700">
