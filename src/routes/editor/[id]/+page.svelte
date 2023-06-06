@@ -119,6 +119,20 @@
 				}}
 			/>
 
+			<label
+				><input
+					type="checkbox"
+					checked={data.chart?.public}
+					on:change|self={(event) => {
+						if (chart_renderer.chart == null) return;
+						chart_renderer.set_chart({
+							...chart_renderer.chart,
+							public: event.currentTarget.checked
+						});
+					}}
+				/> Public</label
+			>
+
 			<button class="w-full bg-slate-300 rounded" on:click={() => save()}
 				>SAVE</button
 			>

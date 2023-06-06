@@ -8,6 +8,7 @@ export interface Chart {
 	readonly width: number;
 	readonly height: number;
 	readonly stitches: Array<Stitch>;
+	readonly public: boolean;
 }
 
 export function chart_from_json_string(

@@ -11,9 +11,21 @@ datasource db {
 }
 
 model Chart {
-  id       String @id
+  id       String  @id
   width    Int
   height   Int
   stitches Bytes
   name     String
+  public   Boolean
+  owner    User    @relation(fields: [owner_id], references: [id])
+  owner_id Int
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  salt     String
+  hash     String
+  charts   Chart[]
+  session  String  @unique
 }
