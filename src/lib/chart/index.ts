@@ -1,16 +1,22 @@
 import Konva from 'konva';
-import type { ChartConfig, IChart } from './types';
+import type { ChartRendererConfig, IChartRenderer } from './types';
 import { Stitch, generate_konva_shape } from '$lib/assets/stitches';
+import { Timer } from '$lib/timer';
+import type { Chart } from './chart';
+export {
+	type Chart,
+	chart_from_json_string,
+	chart_to_json_string
+} from './chart';
 
-// TODO: Make it possible to set each stitch to an actual stitch
-// TODO: Test out pixijs or another library
+// TODO: Move into separate file
 
 Konva.autoDrawEnabled = false;
 
-export class Chart implements IChart {
-	private width: number;
-	private height: number;
-	private stitches: Array<Stitch>;
+const timer = new Timer('Renderer');
+
+export class ChartRenderer implements IChartRenderer {
+	public chart: Chart;
 	private rendered_stitches: Array<Konva.Shape>;
 	private cell_size: number;
 	private stage: Konva.Stage;
@@ -19,32 +25,62 @@ export class Chart implements IChart {
 
 	public selected_stitch: Stitch;
 
-	constructor({ width, height, stitches, container, selected_stitch }: ChartConfig) {
-		if (stitches != undefined && stitches.length < width * height) {
-			throw new Error('List of stitches length does not match the dimensions of the chart.');
-		}
+	constructor({ chart, container, selected_stitch }: ChartRendererConfig) {
+		timer.start();
 
-		this.width = width;
-		this.height = height;
+		this.chart = chart;
 		this.cell_size = Math.min(
-			container.clientWidth / this.width,
-			container.clientHeight / this.height
+			container.clientWidth / this.chart.width,
+			container.clientHeight / this.chart.height
 		);
+		timer.measure('Calculated size');
 
-		this.stitches = stitches ?? new Array(this.width * this.height).fill(Stitch.KNIT);
-		this.rendered_stitches = this.stitches.map((stitch, i) =>
-			generate_konva_shape(stitch, this.cell_size, i % this.width, Math.floor(i / this.height))
+		timer.start_group('Generating stitches');
+
+		this.rendered_stitches = this.chart.stitches.map((stitch, i) =>
+			generate_konva_shape(
+				stitch,
+				this.cell_size,
+				i % this.chart.width,
+				Math.floor(i / this.chart.height)
+			)
 		);
+		timer.measure('Rendered stitches');
+
 		this.selected_stitch = selected_stitch ?? Stitch.NO_STITCH;
+		timer.stop_group();
 
+		timer.start_group('Konva');
 		this.stage = new Konva.Stage({
 			container,
-			width: this.cell_size * this.width,
-			height: this.cell_size * this.height
+			width: this.cell_size * this.chart.width,
+			height: this.cell_size * this.chart.height
 		});
-		this.grid_layer = this.create_grid_layer();
-		this.stitch_layer = this.create_stitch_layer();
-		this.stage.add(this.grid_layer, this.stitch_layer);
+		timer.measure('Stage');
+
+		// GRID LAYER
+		timer.start_group('Grid layer');
+		this.grid_layer = new Konva.Layer();
+		timer.measure('Layer');
+
+		this.stage.add(this.grid_layer);
+		timer.measure('Add layer');
+
+		this.init_grid_layer(this.grid_layer);
+		timer.stop_group();
+
+		// STITCH LAYER
+		timer.start_group('Stitch layer');
+		this.stitch_layer = new Konva.Layer({
+			clearBeforeDraw: false
+		});
+		timer.measure('Layer');
+
+		this.stage.add(this.stitch_layer);
+		timer.measure('Add layer');
+
+		this.init_stitch_layer(this.stitch_layer);
+		timer.stop_group();
 
 		this.stage.on('mousedown', (event) => {
 			// Check if it is not left click
@@ -56,15 +92,17 @@ export class Chart implements IChart {
 
 			this.place_stitch(x, y, this.selected_stitch);
 		});
+		timer.stop_group();
 
 		container.style.width = 'min-content';
 		container.style.height = 'min-content';
+
+		timer.stop();
+		// timer.print();
 	}
 
-	private create_grid_layer(): Konva.Layer {
-		const grid_layer = new Konva.Layer();
-
-		for (let x = 0; x < this.width + 1; x++) {
+	private init_grid_layer(grid_layer: Konva.Layer) {
+		for (let x = 0; x < this.chart.width + 1; x++) {
 			grid_layer.add(
 				new Konva.Line({
 					x: x * this.cell_size,
@@ -74,8 +112,9 @@ export class Chart implements IChart {
 				})
 			);
 		}
+		timer.measure('Vertical lines');
 
-		for (let y = 0; y < this.height + 1; y++) {
+		for (let y = 0; y < this.chart.height + 1; y++) {
 			grid_layer.add(
 				new Konva.Line({
 					y: y * this.cell_size,
@@ -85,25 +124,23 @@ export class Chart implements IChart {
 				})
 			);
 		}
+		timer.measure('Horizontal lines');
 
 		grid_layer.batchDraw();
-		return grid_layer;
+		timer.measure('Batch draw');
 	}
 
-	private create_stitch_layer(): Konva.Layer {
-		const stitch_layer = new Konva.Layer({
-			clearBeforeDraw: false
-		});
-
+	private init_stitch_layer(stitch_layer: Konva.Layer) {
 		stitch_layer.add(...this.rendered_stitches);
+		timer.measure('Add rendered');
 
 		stitch_layer.batchDraw();
-		return stitch_layer;
+		timer.measure('Batch draw');
 	}
 
 	place_stitch(x: number, y: number, stitch: Stitch): void {
-		const index = x + y * this.width;
-		this.stitches[index] = stitch;
+		const index = x + y * this.chart.width;
+		this.chart.stitches[index] = stitch;
 
 		this.rendered_stitches[index].destroy();
 		this.stitch_layer.clear({
@@ -113,12 +150,17 @@ export class Chart implements IChart {
 			height: this.cell_size
 		});
 
-		this.rendered_stitches[index] = generate_konva_shape(stitch, this.cell_size, x, y);
+		this.rendered_stitches[index] = generate_konva_shape(
+			stitch,
+			this.cell_size,
+			x,
+			y
+		);
 		this.stitch_layer.add(this.rendered_stitches[index]);
 		this.rendered_stitches[index].draw();
 	}
 
 	get_stitches(): Stitch[] {
-		return [...this.stitches];
+		return [...this.chart.stitches];
 	}
 }

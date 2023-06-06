@@ -1,18 +1,18 @@
 import type { Stitch } from '$lib/assets/stitches';
+import type { Chart } from './chart';
 
-export interface ChartConfig {
-	width: number;
-	height: number;
+export interface ChartRendererConfig {
+	chart: Chart;
 	container: HTMLDivElement;
 	selected_stitch?: Stitch;
-	stitches?: Stitch[];
 }
 
 /**
  * A chart of stitches that can have stitches be placed on it.
  */
-export interface IChart {
+export interface IChartRenderer {
 	selected_stitch: Stitch;
+	chart: Chart;
 	/**
 	 * Place a single stitch in a specific location.
 	 * @param x - the x coordinate.
