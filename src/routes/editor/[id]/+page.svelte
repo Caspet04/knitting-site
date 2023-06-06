@@ -11,25 +11,25 @@
 
 	export let data: PageServerData;
 	let konva_container: HTMLDivElement;
-	let chart_renderer: ChartRenderer;
+	const chart_renderer = new ChartRenderer();
 
 	$: {
 		(() => {
-			if (data.err || chart_renderer == null) return;
-			chart_renderer.chart = data.chart;
+			if (data.err) return;
+			chart_renderer.set_chart(data.chart);
 		})();
 	}
 
 	onMount(async () => {
 		if (data.err) return;
 
-		chart_renderer = new ChartRenderer({
-			container: konva_container,
-			chart: data.chart
-		});
+		chart_renderer.set_chart(data.chart);
+		chart_renderer.set_container(konva_container);
 	});
 
 	async function save() {
+		if (chart_renderer.chart == null) throw new Error('Chart is not set');
+
 		const response = await fetch(`/editor/${chart_renderer.chart.id}/save`, {
 			method: 'POST',
 			body: JSON.stringify(chart_renderer.chart),

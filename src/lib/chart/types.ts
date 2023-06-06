@@ -2,8 +2,6 @@ import type { Stitch } from '$lib/assets/stitches';
 import type { Chart } from './chart';
 
 export interface ChartRendererConfig {
-	chart: Chart;
-	container: HTMLDivElement;
 	selected_stitch?: Stitch;
 }
 
@@ -12,7 +10,7 @@ export interface ChartRendererConfig {
  */
 export interface IChartRenderer {
 	selected_stitch: Stitch;
-	chart: Chart;
+	chart?: Chart;
 	/**
 	 * Place a single stitch in a specific location.
 	 * @param x - the x coordinate.
@@ -25,4 +23,7 @@ export interface IChartRenderer {
 	 * Get a list of the stitches in the chart.
 	 */
 	get_stitches(): Stitch[];
+
+	set_chart(chart: Chart): void;
+	set_container(container: HTMLDivElement): void;
 }
