@@ -24,4 +24,10 @@ export interface DatabaseManager {
 	 * @returns a result containing the chart or an error.
 	 */
 	load_chart(id: string): AsyncResult<Chart, StandardError>;
+
+	/**
+	 * Loads all the charts in the database.
+	 * @returns a result containing the charts or an error.
+	 */
+	load_charts(): AsyncResult<Array<Chart>, StandardError>;
 }

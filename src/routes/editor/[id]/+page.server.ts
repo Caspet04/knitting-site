@@ -2,7 +2,6 @@ import type { PageServerLoad } from './$types';
 import { database } from '$lib/database';
 import { Stitch } from '$lib/assets/stitches';
 
-// TODO: Add gallery
 // TODO: Add login system
 // TODO: Add ownership checks for saves
 // TODO: Add ownership checks for gallery and viewing charts, unless public

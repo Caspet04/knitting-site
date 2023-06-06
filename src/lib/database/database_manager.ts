@@ -110,4 +110,27 @@ export class SqliteDatabaseManager implements DatabaseManager {
 			}
 		);
 	}
+
+	load_charts(): AsyncResult<Array<Chart>, StandardError> {
+		return new AsyncResultWrapper<Array<Chart>, StandardError>(
+			async (): Promise<Result<Array<Chart>, StandardError>> => {
+				const find_result = await wrap_database_call(
+					this.database.chart.findMany()
+				).resolve();
+
+				if (find_result.err) return Err(find_result.val);
+
+				const charts = find_result.val;
+				return Ok(
+					charts.map((chart) => ({
+						id: chart.id,
+						width: chart.width,
+						height: chart.height,
+						name: chart.name,
+						stitches: [...chart.stitches]
+					}))
+				);
+			}
+		);
+	}
 }
