@@ -29,7 +29,7 @@
 		chart_renderer.set_container(konva_container);
 	});
 
-	async function save() {
+	async function save(attempt = 0) {
 		if (chart_renderer.chart == null) throw new Error('Chart is not set');
 
 		const response = await fetch(`/editor/${chart_renderer.chart.id}/save`, {
@@ -41,7 +41,12 @@
 		});
 
 		if (!response.ok) {
-			// TODO: Handle the error better
+			data.err = {
+				code: 500,
+				message: `Could not save the chart, attempt ${attempt}/10`
+			};
+
+			if (attempt < 10) save(attempt + 1);
 			console.error(response);
 		}
 
@@ -66,10 +71,9 @@
 		relative w-full h-full
 		grid grid-cols-[1fr_70%_1fr] grid-rows-1"
 >
-	{#if data.chart == null}
+	{#if data.err != null}
 		<ErrorOverlay>
-			<p class="text-red-700 font-bold text-center">Chart does not exist</p>
-			<a class="text-center" href="/gallary">Return to gallary</a>
+			<p class="text-red-700 font-bold text-center">{data.err.message}</p>
 		</ErrorOverlay>
 	{/if}
 
