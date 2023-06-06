@@ -83,7 +83,6 @@
 							stitch}
 						class="flex items-center justify-center aspect-square bg-slate-300 border-radius-5 break-all p-1 rounded m-1"
 					>
-						<!-- TODO: Add filled and empty, filled should maybe have a color identificator -->
 						{#if stitch_data.type == 'image'}
 							<img
 								id="stitch-{stitch_data.identifier}"
