@@ -6,8 +6,6 @@ import { CODED_ERROR, type StandardError, standard_error } from '$lib/error';
 import { Err, Ok, Result } from 'ts-results';
 import * as crypto from 'crypto';
 
-// TODO: Clean up and comment the code
-
 function wrap_database_call<T>(
 	promise: Promise<T>
 ): AsyncResult<T, StandardError> {
