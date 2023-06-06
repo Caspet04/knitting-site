@@ -6,9 +6,6 @@ import { CODED_ERROR, type StandardError, standard_error } from '$lib/error';
 import { Err, Ok, Result } from 'ts-results';
 import * as crypto from 'crypto';
 
-// TODO: Implement the last functions of the SqliteDatabaseManager
-// TODO: Check if the solution works
-// TODO: Commit the code if it works
 // TODO: Clean up and comment the code
 
 function wrap_database_call<T>(
