@@ -2,8 +2,6 @@ import type { Chart } from '$lib/chart';
 import type { StandardError } from '$lib/error/';
 import type { AsyncResult } from 'ts-async-results';
 
-// TODO: Consider renaming the Chart, IStandardError, etc to ChartLike, StandardErrorLike
-
 export interface DatabaseManager {
 	/**
 	 * Save the chart to the database, returns the id of the saved chart.
