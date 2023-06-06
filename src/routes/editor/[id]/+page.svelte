@@ -40,19 +40,15 @@
 			}
 		});
 
-		if (!response.ok) {
-			data.err = {
-				code: 500,
-				message: `Could not save the chart, attempt ${attempt}/10`
-			};
-
-			if (attempt < 10) save(attempt + 1);
-			console.error(response);
-		}
-
 		const response_data = await response.json();
 		if (response_data.redirect != null) {
 			goto(response_data.redirect);
+		}
+
+		if (!response.ok) {
+			data.err = response_data;
+
+			console.error(response);
 		}
 	}
 
@@ -72,7 +68,11 @@
 		grid grid-cols-[1fr_70%_1fr] grid-rows-1"
 >
 	{#if data.err != null}
-		<ErrorOverlay>
+		<ErrorOverlay
+			on:disappear={() => {
+				data.err = undefined;
+			}}
+		>
 			<p class="text-red-700 font-bold text-center">{data.err.message}</p>
 		</ErrorOverlay>
 	{/if}
